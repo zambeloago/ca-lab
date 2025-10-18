@@ -1,158 +1,159 @@
-# Clean Architecture User Login System Example
+# Clean Architecture Team Lab Activity: Login and Logout
 
-The following summarizes the structure of the code and highlights the structure of a use case.
-This code will be used as an example in lectures and as the starter code for your next lab activity,
-so please take the time to get familiar with the code this week.
+In this team lab activity, your team will:
+- explore an existing use case (login)
+- add a new use case (logout).
 
-## Getting a copy of the Code
-**To get started exploring the code, fork this repo on GitHub and then make a clone.**
+To earn credit:
+- your team must demo your working `logout` use case.
 
-Open the project in IntelliJ and make sure you can successfully run `app/Main.java`.
+Your demo should be similar to the below example:
 
-> Note: you may need to set the Project SDK in the `Project Structure...` menu, and possibly also manually link the Maven project.
+![](images/sample-logout.gif)
 
-## Understanding the Program
+---
 
-Try the signup, login, and change password use cases by running the program.
-Notice that the "Log Out" button doesn't do anything when you click it — to test whether
-change password worked, you'll need to quit and rerun the program.
+## Task 0: Fork this repo on GitHub
+**To get started, one team member should fork this repo on GitHub and share it with the team.
+All team members should then clone it.**
 
-> Note: some other buttons, like the "Cancel" buttons, are also not fully functional.
 
-### Packaging
+**Suggested logistics:** One of you should invite the others to collaborate on their fork of the
+original repo on GitHub. You can do this in your repo on GitHub under `Settings -> Collaborators`.
+This will allow you to push branches to a common repo and then use pull requests to contribute
+your code and review. To prevent others from pushing directly to the main branch,
+we recommend you set branch protection rules on GitHub. Below are how the settings might look if you
+add branch protection rules:
 
-Explore the package structure in `src\main\java\`. There are packages for
-the CA layers — `view`, `interface_adapter`, `use_case`,
-`entity`, and `data_access` — as well as `app`, a package for the main program
-and code for building everything.
+![image of branch protection rules for main with a requirement of two approvers to merge in pull requests.](images/branch_protection_rules.png)
 
-Two of these packages, `use_case` and `interface_adapter`, have subpackages for each of the
-two use cases: `login` and `signup`. None of the Interactor and Interface Adapter code is
-shared between use cases.
+---
 
-Several packages _don't_ have subpackages: `data_access`, `entity`, `view`, and
-`app`.
+Open the project in IntelliJ and make sure that you can successfully run `app/Main.java`.
 
-* The same View object may have several Use Case buttons inside a single `JPanel`,
-  so separating by use case isn't possible.
-* Entities represent the data from the problem domain that all Use Cases manipulate.
-* The Data Access layer is responsible for saving and reading the Entities.
-* The main application is responsible for building the CA engine and starting the GUI.
-  After the engine is built and the UI becomes visible, the program is driven by the user and
-  the main program has nothing left to do.
+> Note: you may need to set the Project SDK in the `Project Structure...` menu, and possibly
+> also manually link the Maven project.
 
-### A note on English: verb phrases vs. nouns
+## Task 1: Understanding the Program
 
-"Sign up" is a verb phrase and "signup" is a noun. That generalizes: "check in"
-vs "checkin", "log in" vs "login". Two words for the verb phrase, 1 word for the
-noun phrase.
+Open up `app.Main` and read it as a team.
+- What are the Views and what are the current Use Cases implemented?
+- Which Uses Cases are triggered from each View?
+- Which version of the DAO is `app.Main` using?
 
-For example, to complete a login, you need to log in. (Say it out loud. They sound different.)
+The main method makes use of the `app.AppBuilder` class which
+is responsible for constructing our CA engine.
 
-In "the login process", "login" is a noun acting as an adjective to describe
-"process". "Basketball coach" is another example of this English construct.
+Run the program and make sure the signup and login use cases work.
 
-### Comparing the signup and login code
+### Task 1.1: Exploring the login use case
 
-Let's compare these two use cases.
+Let's take a tour of the login use case code:
 
-#### Controllers
+- In IntelliJ, find the `LoginController` class and double click it to open it.
 
-In IntelliJ, find `LoginController` and double click it to open it.
+- Set a breakpoint inside its `execute` method.
 
-Now right-click on `SignupController` and select `Open in Right
-Split`. When you do, you will see the two controllers side by side.
-They are identical in structure, differing only in the
-details.
-
-**This is powerful:** most controllers will look similar. Most presenters
-will look similar. Most interactors will look similar. Any programmer who
-learns about the CA will have a good understanding of
-any controller, interactor, and use case.
-
-**Thought question**: open the CA Engine diagram and compare the types
-in `LoginController` to the diagram. You'll notice that both controllers
-have an Input Boundary that is _injected_ in the constructor, both create
-Input Data from the parameters in method `execute`, and both
-of them call the Use Case execute method, passing in the Input Data. All
-the arguments for the `execute` method come from the View.
-
-#### Presenters
-
-Open `LoginPresenter` and `SignupPresenter` side by side. Both have
-View Model variables and a View Manager Model that are injected into the
-constructor.
-
-Both also have a `prepareSuccessView` method that the Use Case calls
-when it is complete. The job of this method is to update the View Models.
-Read the code for this method in either presenter.
-
-Notice that both of the `prepareSuccessView` methods mutate the state of a View Model
-and call `firePropertyChanged` to alert the relevant View Model that
-the state has changed, and ends with code that tells the View Manager Model
-what the active View should be.
-
-Both Presenters also have a `prepareFailView` method to handle errors.
-
-#### Interactors
-
-Now compare `LoginInteractor` and `SignupInteractor` side by side. (You can drag
-tabs around if you like.)
-
-**Thought question:** Why doesn't the `LoginInteractor` have a `UserFactory`
-but `SignupInteractor` does?
-
-A Controller calls the `execute` method in an Interactor to start processing
-the Use Case data. When it's done, the Interactor tells its Presenter what the result
-is, and the Presenter puts it into the View Model and tells the View Model Manager to change
-which View is showing.
-
-Compare `LoginInteractor` and `SignupInteractor`. Notice that both
-use an Input Boundary, Input Data, Output Boundary, and
-Output Data. Both also have a Data Access Interface, which is what the Interactor
-uses to get data relevant to the Use Case.
-
-The Data Access Interface and Output Boundary are injected in the constructor.
-
-Method `execute` is passed Input Data to process. The Interactor fetches the
-appropriate piece of persistent data from the Data Access Interface, does some error checking
-to make sure the Use Case makes sense, and then does whatever the Use Case
-is supposed to do. Notice the Interactors both end by creating Output Data and
-telling the Presenter to present it.
-
-## Data Access Object (DAO)
-
-There are three DAOs in package `data_access`! All three implement the Data Access Interface
-from the use cases. The Use Case code works with any of them.
-
-* Class `FileUserDataAccessObject` manages data storage and retrieval in a
-CSV file, and also keeps the data in a `Map` for easier access. This temporary storage
-is called a *cache* of the information in the file.
-
-* Class `DBUserDataAccessObject` uses okhttp to use an API, working with JSON data. Your team
-  might want to refer to this when you do your API work. This API is similar to the one from lab;
-  you can read its documentation
-  [here](https://www.postman.com/cloudy-astronaut-813156/csc207-grade-apis-demo/documentation/fg3zkjm/5-password-protected-user). This is the DAO used initially in the `app.AppBuilder` class.
-
-* Class `InMemoryDataAccessObject` doesn't save the user data to any kind of file at all,
-  and is intended to be used by unit tests.
-  * It's also simple to write, which means that you can start
-    programming your Use Cases _before_ you even have the details of data persistence worked out!
-
-> You can change which DAO is being used by modifying the `app.AppBuilder` code.
-
-## Getting Familiar with the Code
-The following two exercises are additional ways to confirm your understanding of the design of the code.
-
-### Exercise 1: Tracing Execution of a Use Case interaction
-- Set a breakpoint inside one of the action listeners for a button, like the "sign up" or "log in" buttons.
-- Run the program in debug mode and perform the interaction.
-- Step through the code to trace the flow of information through the program.
-- Ensure you follow every step of the execution; it may be helpful to refer to a copy of the CA Engine diagram as you do this.
-
-### Exercise 2: Tracing Creation of the CA Engine
-- Set a breakpoint at the very first line of the body of the `Main.main` method.
 - Run the program in debug mode.
-- Step through the code to trace how the `AppBuilder` is used to build the whole program,
-  with the various Views and associated Use Case Interactors getting pieced together.
-- Ensure you follow every step of the execution; it may be helpful to refer to a copy of the CA Engine diagram as you do this.
+
+- Create an account using the signup page if you haven't done so yet.
+
+- On the login page, attempt to log in. When you click the button, the breakpoint
+  that you set will be triggered. **Step through the code to trace the execution of the login use case.**
+  Importantly, pay extra close attention to what the Presenter does to ensure that the LoggedInView gets displayed
+  after the user successfully gets logged into the application.
+
+> Pay attention to the classes involved and the flow of execution. When your team implements the logout use case next,
+> your code will need to have a very similar structure.
+
+## Task 2: Implementing the Logout Use Case
+
+Currently, you'll notice that the "Log Out" button in the `LoggedInView` still doesn't actually log you out of the program.
+It's time to fix that!
+
+We have created all the classes for your team, but some of the code is missing.
+
+**As a team, your task is to fill in the missing code so that the logout use case is implemented.**
+
+> The next part of the readme describes how your team will do this.
+
+Your team will know when you are done when:
+
+- Clicking the "Log Out" button takes the user back to the Login View when you use the program.
+- The provided `LogoutInteractorTest` test passes.
+
+### Task 2.1: Dividing up the work
+
+There are `TODO` comments left in the files.
+
+> Recall that you can use the TODO tool window to conveniently pull up a complete list.
+
+Once all TODOs are complete, the "Log Out" button _should_ work!
+
+As a team, split up the TODOs (see below) between the members of your team.
+
+> Optionally, your team can make GitHub Issues and assign them to each team member..
+
+Make sure each member has at least one TODO that they will be responsible for completing.
+If your team prefers to work in pairs, that is fine too.
+
+The TODOs are summarized below (by file) to help your team decide how to split them up:
+
+---
+
+- `LoggedInView.java` (tip: refer to the other views for similar code)
+    -[ ] TODO: save the logout controller in the instance variable.
+    -[ ] TODO: execute the logout use case through the Controller
+
+---
+
+- `LogoutController.java` (tip: refer to the other controllers for similar code)
+    -[ ] TODO: Save the interactor in the instance variable.
+    -[ ] TODO: run the use case interactor for the logout use case
+
+---
+
+- `LogoutInputData.java` (should be done with the LogoutInteractor TODOs below)
+    -[ ] TODO: save the current username in an instance variable and add a getter.
+- `LogoutInteractor.java` (tip: refer to `ChangePasswordInteractor.java` for similar code)
+    -[ ] TODO: save the DAO and Presenter in the instance variables.
+    -[ ] TODO: implement the logic of the Logout Use Case
+
+---
+
+- `LogoutOutputData.java`
+    -[ ] TODO: save the parameters in the instance variables.
+
+---
+
+- `LogoutPresenter.java` (tip: refer to `SignupPresenter.java` for similar code)
+    -[ ] TODO: assign to the three instance variables.
+    -[ ] TODO: have prepareSuccessView update the LoggedInState
+    -[ ] TODO: have prepareSuccessView update the LoginState
+
+---
+
+### Task 2.2: Getting to work!
+With the work divided up, your team should complete the TODOs through a series of PRs.
+
+1. Make a branch for your work.
+
+> Make sure that you switch to your new branch!
+
+2. Complete your assigned TODO and make a pull request on GitHub. In your pull request,
+   briefly describe what your TODO was and how you implemented it. If you aren't sure
+   about part of it, include this in your pull request so that everyone knows what to look
+   for when reviewing — or you can of course discuss with your team before making your
+   pull request since you are physically working in the same space.
+
+3. Review all pull requests to ensure each TODO is correctly implemented.
+
+4. Once all TODOs are completed, your team should debug as needed to ensure the
+   correctness of the code. Setting a breakpoint where the logout use case
+   interactor starts its work will likely be a great place to start when debugging.
+
+And that's it; your team should now have a working logout use case!
+
+**Demo your working code to your TA to earn credit.**
+
+Your team should spend the rest of the lab working on your project blueprint.
