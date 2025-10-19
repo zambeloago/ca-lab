@@ -18,12 +18,7 @@ Your demo should be similar to the below example:
 All team members should then clone it.**
 
 
-**Suggested logistics:** One of you should invite the others to collaborate on their fork of the
-original repo on GitHub. You can do this in your repo on GitHub under `Settings -> Collaborators`.
-This will allow you to push branches to a common repo and then use pull requests to contribute
-your code and review. To prevent others from pushing directly to the main branch,
-we recommend that you set branch protection rules on GitHub. Below are how the settings might look if you
-add branch protection rules:
+**Suggested logistics:** One of you should invite the others to collaborate on their fork of the original repo on GitHub. You can do this in your repo on GitHub under `Settings -> Collaborators`. This will allow you to push branches to a common repo and then use pull requests to contribute your code and review. To prevent others from pushing directly to the main branch, we recommend that you set branch protection rules on GitHub. Below are how the settings might look if you add branch protection rules:
 
 ![image of branch protection rules for main with a requirement of two approvers to merge in pull requests.](images/branch_protection_rules.png)
 
@@ -31,16 +26,16 @@ add branch protection rules:
 
 ## Task 1: Understanding the Program
 
-Open the project in IntelliJ. Open up `app.Main` and read it as a team.
+Open the project in IntelliJ. Open `app.Main` and read it as a team.
 - What are the currently implemented Views and Use Cases in the program?
 - Which Use Cases are triggered from each View?
 - Which version of the DAO is `app.Main` using?
 
-The main method makes use of the `app.AppBuilder` class which
-is responsible for constructing our CA engine.
+> Observe that the main method makes use of the `app.AppBuilder` class which
+is responsible for constructing our CA engine for each use case of the application. To answer the last two questions above, you will need to look inside the details of the `app.AppBuilder` class.
 
-Finally, make sure that each member of your team can successfully run `app/Main.java`.
-- Ensure that you are able to create a new user and log in using the username and password.
+**Make sure that each member of your team can successfully run `app/Main.java`.**
+- Ensure that you are each able to create a new user and log in using the username and password.
 
 > Note: you may need to set the Project SDK in the `Project Structure...` menu, and possibly
 > also manually link the Maven project if the app won't run when you try to run Main.
@@ -55,12 +50,10 @@ Let's take a tour of the login use case code:
 
 - Run the program in debug mode.
 
-- On the login page, attempt to log in with an existing account. When you click the button, the breakpoint
-  that you set will be triggered.
+- On the login page, attempt to log in with an existing account. When you click the button, the breakpoint that you set will be triggered.
 
 - **Step through the code to trace the execution of the login use case.**
-  Importantly, pay extra close attention to what the Presenter does to ensure that the LoggedInView gets displayed
-  after the user successfully gets logged into the application.
+  Importantly, pay extra close attention to what the Presenter does to ensure that the LoggedInView gets displayed after the user successfully gets logged into the application.
 
 > Pay attention to the classes involved and the flow of execution. When your team implements the logout use case next, your code will need to have a very similar structure.
 
@@ -68,8 +61,7 @@ To better understand how the view gets updated, your team may find it useful to 
 
 ## Task 2: Implementing the Logout Use Case
 
-Currently, you'll notice that the "Log Out" button in the `LoggedInView` still doesn't actually log you out of the program.
-Let's fix this.
+Currently, you'll notice that the "Log Out" button in the `LoggedInView` still doesn't actually log you out of the program. Let's fix this.
 
 We have created all the classes for your team, but some of the code is missing. **As a team, your task is to fill in the missing code so that the logout use case is functional.**
 
@@ -180,8 +172,7 @@ This should remind you of the code we write when adding an action listener to a 
 
 > We'll talk more about this "pattern" of _events_ and _listeners_ in our next module.
 
-When the presenter updates the view model later, an event will be triggered — resulting in the view's `propertyChange` method getting called, with
-a `PropertyChangeEvent` object being passed through as the argument to the call.
+When the presenter updates the view model later, an event will be triggered — resulting in the view's `propertyChange` method getting called, with a `PropertyChangeEvent` object being passed through as the argument to the call.
 
 For example, the `LoginView.propertyChange` method looks like:
 
@@ -193,15 +184,11 @@ public void propertyChange(PropertyChangeEvent evt) {
     }
 ```
 
-The `LoginView` gets the `LoginState` object stored in the `LoginViewModel`
-and updates itself with that information.
+The `LoginView` gets the `LoginState` object stored in the `LoginViewModel` and updates itself with that information.
 
 ## A Presenter and its ViewModel(s)
 
-A presenter may have one or more view models associated with it. For example, the
-login use case's presenter has a reference to a `LoginViewModel` and a `LoggedInViewModel`,
-since it will need to update both view models. Additionally, our implementation
-makes use of a `ViewManager` and `ViewManagerModel` to keep track of which view
+A presenter may have one or more view models associated with it. For example, the login use case's presenter has a reference to a `LoginViewModel` and a `LoggedInViewModel`, since it will need to update both view models. Additionally, our implementation makes use of a `ViewManager` and `ViewManagerModel` to keep track of which view
 the user should currently see.
 
 Let's take a look at the `LoginPresenter.prepareSuccessView` method as an example:
